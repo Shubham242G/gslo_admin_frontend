@@ -15,24 +15,25 @@ const Dashboard = () => {
   }, []);
 
   const fetchStats = async () => {
-    try {
-      const [blogsRes, newsRes, testimonialsRes] = await Promise.all([
-        api.get('/blogs'),
-        api.get('/news'),
-        api.get('/testimonials'),
-      ]);
-      
-      setStats({
-        blogs: blogsRes.data.length,
-        news: newsRes.data.length,
-        testimonials: testimonialsRes.data.length,
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const [blogsRes, newsRes, testimonialsRes] = await Promise.all([
+      api.get('/blogs'),
+      api.get('/news'),
+      api.get('/testimonials'),
+    ]);
+
+    setStats({
+      blogs: blogsRes.data.total || blogsRes.data.blogs?.length || 0,
+      news: newsRes.data.length || 0,
+      testimonials: testimonialsRes.data.length || 0,
+    });
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex min-h-screen bg-gray-100">

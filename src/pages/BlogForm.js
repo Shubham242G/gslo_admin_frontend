@@ -9,6 +9,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 const BlogForm = () => {
+  const [hydrated, setHydrated] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -28,21 +29,29 @@ const BlogForm = () => {
     if (isEditMode) fetchBlog();
   }, [id]);
 
-  const fetchBlog = async () => {
-    try {
-      const { data } = await api.get(`/blogs/${id}`);
-      setFormData({
-        title: data.title,
-        content: data.content,
-        author: data.author,
-        category: data.category,
-        status: data.status,
-      });
-      setImage(data.image || '');
-    } catch {
-      toast.error('Error fetching blog');
-    }
-  };
+ const fetchBlog = async () => {
+  try {
+    const res = await api.get(`/blogs/${id}`);
+
+    const blog = res.data;
+
+    setFormData({
+      title: blog.title ?? '',
+      content: blog.content ?? '',
+      author: blog.author ?? '',
+      category: blog.category ?? '',
+      status: blog.status ?? 'draft',
+    });
+
+    setImage(blog.image ?? '');
+    setHydrated(true); // ✅ mark as ready
+  } catch (error) {
+    toast.error('Error fetching blog');
+  }
+};
+
+
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -91,6 +100,14 @@ const BlogForm = () => {
       setLoading(false);
     }
   };
+
+  if (isEditMode && !hydrated) {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="animate-spin h-10 w-10 border-b-2 border-blue-600 rounded-full" />
+    </div>
+  );
+}
 
   return (
     <div className="flex min-h-screen bg-gray-100">
